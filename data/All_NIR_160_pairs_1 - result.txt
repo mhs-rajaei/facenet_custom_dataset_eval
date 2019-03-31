@@ -1,0 +1,66 @@
+E:\Program\Anaconda3\envs\tf_1.8.0\python.exe F:/Documents/JetBrains/PyCharm/OFR/original_facenet/validate_on_lfw.py "E:\Projects & Courses\CpAE\NIR-VIS-2.0 Dataset -cbsr.ia.ac.cn\All NIR_160" --lfw_pairs F:\Documents\JetBrains\PyCharm\OFR\original_facenet\data\All_NIR_160_pairs_1.txt F:\Documents\JetBrains\PyCharm\OFR\original_facenet\models\facenet\20180402-114759 --distance_metric 1 --use_flipped_images --subtract_mean --use_fixed_image_standardization
+2019-03-31 13:49:02.721382: I T:\src\github\tensorflow\tensorflow\core\platform\cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2
+2019-03-31 13:49:03.276823: I T:\src\github\tensorflow\tensorflow\core\common_runtime\gpu\gpu_device.cc:1356] Found device 0 with properties: 
+name: GeForce GT 750M major: 3 minor: 0 memoryClockRate(GHz): 0.967
+pciBusID: 0000:01:00.0
+totalMemory: 2.00GiB freeMemory: 1.65GiB
+2019-03-31 13:49:03.277901: I T:\src\github\tensorflow\tensorflow\core\common_runtime\gpu\gpu_device.cc:1435] Adding visible gpu devices: 0
+2019-03-31 13:49:03.694997: I T:\src\github\tensorflow\tensorflow\core\common_runtime\gpu\gpu_device.cc:923] Device interconnect StreamExecutor with strength 1 edge matrix:
+2019-03-31 13:49:03.695651: I T:\src\github\tensorflow\tensorflow\core\common_runtime\gpu\gpu_device.cc:929]      0 
+2019-03-31 13:49:03.696085: I T:\src\github\tensorflow\tensorflow\core\common_runtime\gpu\gpu_device.cc:942] 0:   N 
+2019-03-31 13:49:03.696986: I T:\src\github\tensorflow\tensorflow\core\common_runtime\gpu\gpu_device.cc:1053] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 1438 MB memory) -> physical GPU (device: 0, name: GeForce GT 750M, pci bus id: 0000:01:00.0, compute capability: 3.0)
+Model directory: F:\Documents\JetBrains\PyCharm\OFR\original_facenet\models\facenet\20180402-114759
+Metagraph file: model-20180402-114759.meta
+Checkpoint file: model-20180402-114759.ckpt-275
+2019-03-31 13:49:07.842941: W T:\src\github\tensorflow\tensorflow\core\graph\graph_constructor.cc:1244] Importing a graph with a lower producer version 24 into an existing graph with producer version 26. Shape inference will have run different parts of the graph with different producer versions.
+Runnning forward pass on LFW images
+nrof_images: 16676
+2019-03-31 13:49:26.451737: W T:\src\github\tensorflow\tensorflow\core\common_runtime\bfc_allocator.cc:219] Allocator (GPU_0_bfc) ran out of memory trying to allocate 1.51GiB. The caller indicates that this is not a failure, but may mean that there could be performance gains if more memory were available.
+.....................................
+F:\Documents\JetBrains\PyCharm\OFR\original_facenet\facenet.py:418: RuntimeWarning: invalid value encountered in arccos
+  dist = np.arccos(similarity) / math.pi
+F:\Documents\JetBrains\PyCharm\OFR\original_facenet\facenet.py:458: RuntimeWarning: invalid value encountered in less
+  predict_issame = np.less(dist, threshold)
+F:\Documents\JetBrains\PyCharm\OFR\original_facenet\facenet.py:509: RuntimeWarning: invalid value encountered in less
+  predict_issame = np.less(dist, threshold)
+Info: float(n_diff) equal to zero
+Info: float(n_diff) equal to zero
+Info: float(n_diff) equal to zero
+Info: float(n_diff) equal to zero
+Info: float(n_diff) equal to zero
+Info: float(n_same) equal to zero
+Info: float(n_same) equal to zero
+Info: float(n_same) equal to zero
+Info: float(n_same) equal to zero
+Accuracy: 0.97218+-0.02444
+Validation rate: 0.56857+-0.46430 @ FAR=0.00098
+Area Under Curve (AUC): 0.286
+2019-03-31 13:54:15.994406: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:285] _1_FIFOQueueV2: Skipping cancelled dequeue attempt with queue not closed
+2019-03-31 13:54:15.995050: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:285] _1_FIFOQueueV2: Skipping cancelled dequeue attempt with queue not closed
+2019-03-31 13:54:15.995721: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:277] _2_input_producer: Skipping cancelled enqueue attempt with queue not closed
+2019-03-31 13:54:16.000567: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:285] _1_FIFOQueueV2: Skipping cancelled dequeue attempt with queue not closed
+2019-03-31 13:54:16.001995: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:285] _1_FIFOQueueV2: Skipping cancelled dequeue attempt with queue not closed
+2019-03-31 13:54:16.002630: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:285] _1_FIFOQueueV2: Skipping cancelled dequeue attempt with queue not closed
+2019-03-31 13:54:16.003274: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:285] _1_FIFOQueueV2: Skipping cancelled dequeue attempt with queue not closed
+2019-03-31 13:54:16.004283: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:285] _1_FIFOQueueV2: Skipping cancelled dequeue attempt with queue not closed
+2019-03-31 13:54:16.005079: W T:\src\github\tensorflow\tensorflow\core\kernels\queue_base.cc:285] _1_FIFOQueueV2: Skipping cancelled dequeue attempt with queue not closed
+Traceback (most recent call last):
+  File "F:/Documents/JetBrains/PyCharm/OFR/original_facenet/validate_on_lfw.py", line 194, in <module>
+    main(obj_args)
+  File "F:/Documents/JetBrains/PyCharm/OFR/original_facenet/validate_on_lfw.py", line 83, in main
+    args.use_flipped_images, args.use_fixed_image_standardization)
+  File "F:/Documents/JetBrains/PyCharm/OFR/original_facenet/validate_on_lfw.py", line 139, in evaluate
+    eer = brentq(lambda x: 1. - x - interpolate.interp1d(fpr, tpr)(x), 0., 1.)
+  File "E:\Program\Anaconda3\envs\tf_1.8.0\lib\site-packages\scipy\optimize\zeros.py", line 519, in brentq
+    r = _zeros._brentq(f,a,b,xtol,rtol,maxiter,args,full_output,disp)
+  File "F:/Documents/JetBrains/PyCharm/OFR/original_facenet/validate_on_lfw.py", line 139, in <lambda>
+    eer = brentq(lambda x: 1. - x - interpolate.interp1d(fpr, tpr)(x), 0., 1.)
+  File "E:\Program\Anaconda3\envs\tf_1.8.0\lib\site-packages\scipy\interpolate\polyint.py", line 79, in __call__
+    y = self._evaluate(x)
+  File "E:\Program\Anaconda3\envs\tf_1.8.0\lib\site-packages\scipy\interpolate\interpolate.py", line 634, in _evaluate
+    below_bounds, above_bounds = self._check_bounds(x_new)
+  File "E:\Program\Anaconda3\envs\tf_1.8.0\lib\site-packages\scipy\interpolate\interpolate.py", line 666, in _check_bounds
+    raise ValueError("A value in x_new is above the interpolation "
+ValueError: A value in x_new is above the interpolation range.
+
+Process finished with exit code 1
