@@ -103,6 +103,10 @@ def evaluate(sess, enqueue_op, image_paths_placeholder, labels_placeholder, phas
     sess.run(enqueue_op, {image_paths_placeholder: image_paths_array, labels_placeholder: labels_array, control_placeholder: control_array})
     
     embedding_size = int(embeddings.get_shape()[1])
+    print(f"nrof_images: {nrof_images}")
+
+    batch_size = closest_number(nrof_images, batch_size, 100)
+
     assert nrof_images % batch_size == 0, 'The number of LFW images must be an integer multiple of the LFW batch size'
     nrof_batches = nrof_images // batch_size
     emb_array = np.zeros((nrof_images, embedding_size))
@@ -134,7 +138,17 @@ def evaluate(sess, enqueue_op, image_paths_placeholder, labels_placeholder, phas
     print('Area Under Curve (AUC): %1.3f' % auc)
     eer = brentq(lambda x: 1. - x - interpolate.interp1d(fpr, tpr)(x), 0., 1.)
     print('Equal Error Rate (EER): %1.3f' % eer)
-    
+
+
+def closest_number(number, divisible, max_bound):
+    for i in range(max_bound+1):
+        if number % (divisible + i) == 0:
+            return divisible + i
+        if number % (divisible - i) == 0:
+            return divisible - i
+
+    return None
+
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
     
@@ -160,8 +174,24 @@ def parse_arguments(argv):
         help='Performs fixed standardization of images.', action='store_true')
     return parser.parse_args(argv)
 
+
+class Args:
+    lfw_dir = r"E:\Projects & Courses\CpAE\NIR-VIS-2.0 Dataset -cbsr.ia.ac.cn\All VIS_160"
+    lfw_batch_size = 100
+    model = r"F:\Documents\JetBrains\PyCharm\OFR\original_facenet\models\facenet\20180402-114759"
+    image_size = 160
+    lfw_pairs = r"F:\Documents\JetBrains\PyCharm\OFR\original_facenet\data\All_VIS_160_pairs_3.txt"
+    lfw_nrof_folds = 10
+    distance_metric = 1
+    use_flipped_images = True
+    subtract_mean = True
+    use_fixed_image_standardization = True
+
+
 if __name__ == '__main__':
-    main(parse_arguments(sys.argv[1:]))
+    # main(parse_arguments(sys.argv[1:]))
+    obj_args = Args()
+    main(obj_args)
 
     """
     F:\Documents\JetBrains\PyCharm\OFR\images\lfw_160
