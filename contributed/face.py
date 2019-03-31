@@ -42,7 +42,8 @@ import facenet
 
 
 gpu_memory_fraction = 0.3
-facenet_model_checkpoint = os.path.dirname(__file__) + "/../model_checkpoints/20170512-110547"
+# facenet_model_checkpoint = os.path.dirname(__file__) + "/../model_checkpoints/20170512-110547"
+facenet_model_checkpoint = r"F:\Documents\JetBrains\PyCharm\OFR\original_facenet\models\facenet\20180402-114759"
 classifier_model = os.path.dirname(__file__) + "/../model_checkpoints/my_classifier_1.pkl"
 debug = False
 
