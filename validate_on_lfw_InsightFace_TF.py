@@ -32,14 +32,76 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 import argparse
-import facenet
-import lfw
+# import facenet
+# import lfw
 import os
 import sys
 from tensorflow.python.ops import data_flow_ops
 from sklearn import metrics
 from scipy.optimize import brentq
 from scipy import interpolate
+
+from os.path import join
+
+
+PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
+
+log_path = os.path.join(PROJECT_PATH, 'output')
+models_path = os.path.join(PROJECT_PATH, 'models')
+# train_dataset_path = r'F:\Documents\JetBrains\PyCharm\OFR\images\1024First_lfw_160'
+# eval_pairs_path = os.path.join(PROJECT_PATH, 'data/All_VIS_112_pairs_3.txt')
+
+
+from importlib.machinery import SourceFileLoader
+facenet = SourceFileLoader('facenet', os.path.join(PROJECT_PATH, 'MR_facenet.py')).load_module()
+
+eval_data_reader = SourceFileLoader('eval_data_reader', os.path.join(PROJECT_PATH, 'eval_data_reader.py')).load_module()
+verification = SourceFileLoader('verification', os.path.join(PROJECT_PATH, 'verification.py')).load_module()
+lfw = SourceFileLoader('lfw', os.path.join(PROJECT_PATH, 'lfw.py')).load_module()
+
+
+class Args:
+    lfw_nrof_folds = 10
+    distance_metric = 1
+    use_flipped_images = True
+    subtract_mean = True
+    use_fixed_image_standardization = True
+
+    net_depth = 50
+    epoch = 1000
+    lr_steps = [40000, 60000, 80000]
+    momentum = 0.9
+    weight_decay = 5e-4
+
+    # image_size = [160, 160]
+    num_output = 85164
+
+    # train_dataset_dir = train_dataset_path
+    train_dataset_dir = None
+    summary_path = join(log_path, 'summary')
+    ckpt_path = join(log_path, 'ckpt')
+    log_file_path = join(log_path, 'logs')
+
+    saver_maxkeep = 10
+    buffer_size = 10000
+    log_device_mapping = False
+    summary_interval = 100
+    ckpt_interval = 100
+    validate_interval = 100
+    show_info_interval = 100
+    seed = 313
+    nrof_preprocess_threads = 4
+
+    # eval_dataset = eval_dir_path
+    eval_pair = os.path.join(PROJECT_PATH, 'data/First_100_ALL VIS_160_1.txt')
+    eval_dataset = r"E:\Projects & Courses\CpAE\NIR-VIS-2.0 Dataset -cbsr.ia.ac.cn\First_100_ALL VIS_160"
+    lfw_dir = eval_dataset
+    batch_size = 32
+    lfw_batch_size = batch_size
+    model = os.path.join(PROJECT_PATH, 'models/facenet/20180402-114759')
+    image_size = 160
+    lfw_pairs = eval_pair
+
 
 def main(args):
   
@@ -52,7 +114,17 @@ def main(args):
 
             # Get the paths for the corresponding images
             paths, actual_issame = lfw.get_paths_2(os.path.expanduser(args.lfw_dir), pairs)
-            
+
+            # InsightFace_TF evaluation
+            ver_list = []
+            ver_name_list = []
+            print('Begin evaluation %s convert.' % args.eval_dataset)
+
+            data_set = eval_data_reader.load_eval_datasets_2(args)
+            ver_list.append(data_set)
+            ver_name_list.append(args.eval_dataset)
+            #  --------------------------------------------------------------------------------------
+
             image_paths_placeholder = tf.placeholder(tf.string, shape=(None,1), name='image_paths')
             labels_placeholder = tf.placeholder(tf.int32, shape=(None,1), name='labels')
             batch_size_placeholder = tf.placeholder(tf.int32, name='batch_size')
@@ -74,17 +146,25 @@ def main(args):
 
             # Get output tensor
             embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
-#              
+
             coord = tf.train.Coordinator()
             tf.train.start_queue_runners(coord=coord, sess=sess)
 
-            evaluate(sess, eval_enqueue_op, image_paths_placeholder, labels_placeholder, phase_train_placeholder, batch_size_placeholder, control_placeholder,
-                embeddings, label_batch, paths, actual_issame, args.lfw_batch_size, args.lfw_nrof_folds, args.distance_metric, args.subtract_mean,
-                args.use_flipped_images, args.use_fixed_image_standardization)
+            results = verification.ver_test(ver_list=ver_list, ver_name_list=ver_name_list, nbatch=0, sess=sess,
+                               embedding_tensor=embeddings, batch_size=args.batch_size, feed_dict=input_map,
+                               input_placeholder=image_batch, phase_train_placeholder=phase_train_placeholder)
+
+            print(results)
+
+            # evaluate(sess, eval_enqueue_op, image_paths_placeholder, labels_placeholder, phase_train_placeholder, batch_size_placeholder,
+            #          control_placeholder, embeddings, label_batch, paths, actual_issame, args.lfw_batch_size, args.lfw_nrof_folds,
+            #          args.distance_metric, args.subtract_mean, args.use_flipped_images, args.use_fixed_image_standardization)
 
               
-def evaluate(sess, enqueue_op, image_paths_placeholder, labels_placeholder, phase_train_placeholder, batch_size_placeholder, control_placeholder,
-        embeddings, labels, image_paths, actual_issame, batch_size, nrof_folds, distance_metric, subtract_mean, use_flipped_images, use_fixed_image_standardization):
+def evaluate(sess, enqueue_op, image_paths_placeholder, labels_placeholder, phase_train_placeholder, batch_size_placeholder,
+             control_placeholder,embeddings, labels, image_paths, actual_issame, batch_size, nrof_folds, distance_metric, subtract_mean,
+             use_flipped_images,use_fixed_image_standardization):
+
     # Run forward pass to calculate embeddings
     print('Runnning forward pass on LFW images')
     
@@ -149,58 +229,7 @@ def closest_number(number, divisible, max_bound):
 
     return None
 
-def parse_arguments(argv):
-    parser = argparse.ArgumentParser()
-    
-    parser.add_argument('lfw_dir', type=str,
-        help='Path to the data directory containing aligned LFW face patches.')
-    parser.add_argument('--lfw_batch_size', type=int,
-        help='Number of images to process in a batch in the LFW test set.', default=100)
-    parser.add_argument('model', type=str, 
-        help='Could be either a directory containing the meta_file and ckpt_file or a model protobuf (.pb) file')
-    parser.add_argument('--image_size', type=int,
-        help='Image size (height, width) in pixels.', default=160)
-    parser.add_argument('--lfw_pairs', type=str,
-        help='The file containing the pairs to use for validation.', default='data/pairs.txt')
-    parser.add_argument('--lfw_nrof_folds', type=int,
-        help='Number of folds to use for cross validation. Mainly used for testing.', default=10)
-    parser.add_argument('--distance_metric', type=int,
-        help='Distance metric  0:euclidian, 1:cosine similarity.', default=0)
-    parser.add_argument('--use_flipped_images', 
-        help='Concatenates embeddings for the image and its horizontally flipped counterpart.', action='store_true')
-    parser.add_argument('--subtract_mean', 
-        help='Subtract feature mean before calculating distance.', action='store_true')
-    parser.add_argument('--use_fixed_image_standardization', 
-        help='Performs fixed standardization of images.', action='store_true')
-    return parser.parse_args(argv)
-
-
-class Args:
-    lfw_dir = r"E:\Projects & Courses\CpAE\NIR-VIS-2.0 Dataset -cbsr.ia.ac.cn\All VIS_160"
-    lfw_batch_size = 100
-    model = r"F:\Documents\JetBrains\PyCharm\OFR\facenet_custom_dataset_eval\models\facenet\20180402-114759"
-    image_size = 160
-    lfw_pairs = r"F:\Documents\JetBrains\PyCharm\OFR\facenet_custom_dataset_eval\data\All_VIS_160_pairs_3.txt"
-    lfw_nrof_folds = 10
-    distance_metric = 1
-    use_flipped_images = True
-    subtract_mean = True
-    use_fixed_image_standardization = True
-
-
 if __name__ == '__main__':
     # main(parse_arguments(sys.argv[1:]))
     obj_args = Args()
     main(obj_args)
-
-    """
-    F:\Documents\JetBrains\PyCharm\OFR\images\lfw_160
-    --lfw_pairs
-    F:\Documents\JetBrains\PyCharm\OFR\original_facenet\data\All_VIS_160_pairs.txt
-    F:\Documents\JetBrains\PyCharm\OFR\original_facenet\models\facenet\20180402-114759
-    --distance_metric
-    1
-    --use_flipped_images
-    --subtract_mean
-    --use_fixed_image_standardization
-    """
