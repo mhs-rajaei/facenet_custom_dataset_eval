@@ -28,25 +28,14 @@ in the same directory, and the metagraph should have the extension '.meta'.
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 import tensorflow as tf
-import numpy as np
 import os
-import sys
-from tensorflow.python.ops import data_flow_ops
-from sklearn import metrics
-from scipy.optimize import brentq
-from scipy import interpolate
-
-from os.path import join
 
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 log_path = os.path.join(PROJECT_PATH, 'output')
 models_path = os.path.join(PROJECT_PATH, 'models')
-# train_dataset_path = r'F:\Documents\JetBrains\PyCharm\OFR\images\1024First_lfw_160'
-# eval_pairs_path = os.path.join(PROJECT_PATH, 'data/All_VIS_112_pairs_3.txt')
 
 
 from importlib.machinery import SourceFileLoader
@@ -55,49 +44,6 @@ facenet = SourceFileLoader('facenet', os.path.join(PROJECT_PATH, 'MR_facenet.py'
 eval_data_reader = SourceFileLoader('eval_data_reader', os.path.join(PROJECT_PATH, 'eval_data_reader.py')).load_module()
 verification = SourceFileLoader('verification', os.path.join(PROJECT_PATH, 'verification.py')).load_module()
 lfw = SourceFileLoader('lfw', os.path.join(PROJECT_PATH, 'lfw.py')).load_module()
-
-
-class Args:
-    lfw_nrof_folds = 10
-    distance_metric = 1
-    use_flipped_images = True
-    subtract_mean = True
-    use_fixed_image_standardization = True
-
-    net_depth = 50
-    epoch = 1000
-    lr_steps = [40000, 60000, 80000]
-    momentum = 0.9
-    weight_decay = 5e-4
-
-    # image_size = [160, 160]
-    num_output = 85164
-
-    # train_dataset_dir = train_dataset_path
-    train_dataset_dir = None
-    summary_path = join(log_path, 'summary')
-    ckpt_path = join(log_path, 'ckpt')
-    log_file_path = join(log_path, 'logs')
-
-    saver_maxkeep = 10
-    buffer_size = 10000
-    log_device_mapping = False
-    summary_interval = 100
-    ckpt_interval = 100
-    validate_interval = 100
-    show_info_interval = 100
-    seed = 313
-    nrof_preprocess_threads = 4
-
-    # eval_dataset = eval_dir_path
-    eval_pair = os.path.join(PROJECT_PATH, 'data/First_100_ALL VIS_160_1.txt')
-    eval_dataset = r"E:\Projects & Courses\CpAE\NIR-VIS-2.0 Dataset -cbsr.ia.ac.cn\First_100_ALL VIS_160"
-    lfw_dir = eval_dataset
-    batch_size = 32
-    lfw_batch_size = batch_size
-    model = os.path.join(PROJECT_PATH, 'models/facenet/20180402-114759')
-    image_size = 160
-    lfw_pairs = eval_pair
 
 
 def main(args):
@@ -110,7 +56,7 @@ def main(args):
             # InsightFace_TF evaluation
             ver_list = []
             ver_name_list = []
-            print('Begin evaluation %s convert.' % args.eval_dataset)
+            print('Begin evaluation of %s .' % args.eval_dataset)
 
             data_set = eval_data_reader.load_eval_datasets_2(args)
             ver_list.append(data_set)
@@ -131,11 +77,24 @@ def main(args):
             # Get output tensor
             embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
 
-            results = verification.ver_test(ver_list=ver_list, ver_name_list=ver_name_list, nbatch=0, sess=sess,
-                               embedding_tensor=embeddings, batch_size=args.batch_size, feed_dict=input_map,
-                               input_placeholder=image_batch, phase_train_placeholder=phase_train_placeholder)
+            results = verification.ver_test(ver_list=ver_list, ver_name_list=ver_name_list, nbatch=0, sess=sess, embedding_tensor=embeddings,
+                                            batch_size=args.batch_size, feed_dict=input_map,input_placeholder=image_batch,
+                                            phase_train_placeholder=phase_train_placeholder)
 
             print(results)
+
+
+class Args:
+    image_size = 160
+    batch_size = 32
+
+    eval_pair = os.path.join(PROJECT_PATH, 'data/First_100_ALL VIS_160_1.txt')
+    eval_dataset = r"E:\Projects & Courses\CpAE\NIR-VIS-2.0 Dataset -cbsr.ia.ac.cn\First_100_ALL VIS_160"
+
+    lfw_dir = eval_dataset
+    lfw_batch_size = batch_size
+    model = os.path.join(PROJECT_PATH, 'models/facenet/20180402-114759')
+    lfw_pairs = eval_pair
 
 
 if __name__ == '__main__':
